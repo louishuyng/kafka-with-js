@@ -10,34 +10,38 @@ async function run() {
       clientId: "mykafkaApp",
       brokers: ["louis:9092"],
     });
-    const admin = kafka.admin();
+    // const admin = kafka.admin();
     const producer = kafka.producer();
     console.log("Connecting........");
 
-    await admin.connect();
+    // await admin.connect();
     await producer.connect();
     console.log("Connected.........");
 
-    producer.send({
+    const partition = msg[0] < "N";
+
+    const result = await producer.send({
       topic: "Users",
       messages: [
         {
           value: msg,
+          partition: partition,
         },
       ],
     });
 
-    admin.createTopics({
-      topics: [
-        {
-          topic: "Users",
-          numPartitions: 2,
-        },
-      ],
-    });
+    // admin.createTopics({
+    //   topics: [
+    //     {
+    //       topic: "Users",
+    //       numPartitions: 2,
+    //     },
+    //   ],
+    // });
 
-    console.log("Created Successfully!");
-    await admin.disconnect();
+    console.log(`Send Successfully! ${JSON.stringify(result)}`);
+    // await admin.disconnect();
+    await producer.disconnect();
   } catch (er) {
     console.log(`Some thing bad happend ${er}`);
   } finally {
